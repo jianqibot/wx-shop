@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GoodsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">wx-shop</a> &gt; <a href="index.source.html" class="el_package">com.github.jianqibot.wxshop.controller</a> &gt; <span class="el_source">GoodsController.java</span></div><h1>GoodsController.java</h1><pre class="source lang-java linenums">package com.github.jianqibot.wxshop.controller;
+
+
+import com.github.jianqibot.wxshop.entity.HttpException;
+import com.github.jianqibot.wxshop.entity.PageResponse;
+import com.github.jianqibot.wxshop.entity.Response;
+import com.github.jianqibot.wxshop.generate.Goods;
+import com.github.jianqibot.wxshop.service.GoodsService;
+import com.github.jianqibot.wxshop.service.UserContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+
+@RestController
+@RequestMapping(&quot;/api/v1&quot;)
+public class GoodsController {
+    private final GoodsService goodsService;
+
+    @Inject
+<span class="fc" id="L23">    public GoodsController(GoodsService goodsService) {</span>
+<span class="fc" id="L24">        this.goodsService = goodsService;</span>
+<span class="fc" id="L25">    }</span>
+
+    /**
+     * @api {get} /goods fetch all goods
+     * @apiName GetGoods
+     * @apiGroup goods
+     *
+     * @apiHeader {String} Accept application/json
+     *
+     * @apiParam {Number} pageNum page number, from 1
+     * @apiParam {Number} pageSize page size, how many item in one page
+     * @apiParam {Number} [shopId] shop ID，if not null，only display items in this shop
+     *
+     * @apiSuccess {Number} pageNum page number, from 1
+     * @apiSuccess {Number} pageSize page size, how many item in one page
+     * @apiSuccess {Number} totalPage page in total
+     * @apiSuccess {Goods} data goods list
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;pageNum&quot;: 1,
+     *       &quot;pageSize&quot;: 10,
+     *       &quot;totalPage&quot;: 5,
+     *       &quot;data&quot;: [
+     *          {
+     *              &quot;id&quot;: 123,
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10,
+     *              &quot;shopId&quot;: 12345,
+     *              &quot;createdAt&quot;: &quot;2020-03-22T13:22:03Z&quot;,
+     *              &quot;updatedAt&quot;: &quot;2020-03-22T13:22:03Z&quot;
+     *          },
+     *          {
+     *              ...
+     *          }
+     *       ]
+     *     }
+     *
+     * @apiError 401 Unauthorized If user hasn't login
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *       &quot;message&quot;: &quot;Unauthorized&quot;
+     *     }
+     */
+    /**
+     *
+     * @param pageNum page number
+     * @param pageSize page size
+     * @param shopId shop ID
+     * @return goods list
+     */
+    @GetMapping(&quot;/goods&quot;)
+    @ResponseBody
+    public PageResponse&lt;Goods&gt; getGoods(@RequestParam(&quot;pageNum&quot;) Integer pageNum,
+                                        @RequestParam(&quot;pageSize&quot;) Integer pageSize,
+                                        @RequestParam(value = &quot;shopId&quot;, required = false) Long shopId) {
+
+<span class="fc" id="L89">        return  goodsService.getGoods(pageNum, pageSize, shopId);</span>
+    }
+
+
+    /**
+     * @api {post} /goods Create Goods
+     * @apiName CreateGoods
+     * @apiGroup goods
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiParamExample {json} Request-Example:
+     *          {
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10,
+     *              &quot;shopId&quot;: 12345
+     *          }
+     *
+     *
+     * @apiSuccess {Goods} data Goods Created
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 201 Created
+     *     {
+     *       &quot;data&quot;: {
+     *              &quot;id&quot;: 123,
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10,
+     *              &quot;shopId&quot;: 12345,
+     *              &quot;createdAt&quot;: &quot;2020-03-22T13:22:03Z&quot;,
+     *              &quot;updatedAt&quot;: &quot;2020-03-22T13:22:03Z&quot;
+     *       }
+     *     }
+     *
+     * @apiError 400 Bad Request If request contains error
+     * @apiError 401 Unauthorized If user hasn't login yet
+     * @apiError 403 Forbidden If user try to access shop which does not belong to him
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *       &quot;message&quot;: &quot;Unauthorized&quot;
+     *     }
+     */
+
+    /**
+     * @param goods goods to be created
+     * @param response the HTTP response
+     * @return the newly created goods
+     */
+    @PostMapping(&quot;/goods&quot;)
+    public Response&lt;Goods&gt; createGoods(@RequestBody Goods goods,
+                                       HttpServletResponse response) {
+<span class="fc" id="L151">        dataSanitization(goods);</span>
+<span class="fc" id="L152">        response.setStatus(HttpStatus.CREATED.value());</span>
+        try {
+<span class="fc" id="L154">            return Response.of(goodsService.createGoods(goods, UserContext.getCurrentUser().getId()));</span>
+<span class="nc" id="L155">        } catch (HttpException e) {</span>
+<span class="nc" id="L156">            response.setStatus(e.getStatusCode());</span>
+<span class="nc" id="L157">            return Response.error(e.getMessage());</span>
+        }
+    }
+
+    /**
+     * @api {patch} /goods/:id update goods
+     * @apiName UpdateGoods
+     * @apiGroup goods
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiParam {Number} id goods ID
+     * @apiParamExample {json} Request-Example:
+     *          {
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10
+     *          }
+     *
+     *
+     * @apiSuccess {Goods} data updated goods
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;data&quot;: {
+     *              &quot;id&quot;: 123,
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10,
+     *              &quot;createdAt&quot;: &quot;2020-03-22T13:22:03Z&quot;,
+     *              &quot;updatedAt&quot;: &quot;2020-03-22T13:22:03Z&quot;
+     *       }
+     *     }
+     *
+     * @apiError 400 Bad Request If request contains error
+     * @apiError 401 Unauthorized If user hasn't login yet
+     * @apiError 403 Forbidden If user try to access shop which does not belong to him
+     * @apiError 404 Not Found If goods was not found
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *       &quot;message&quot;: &quot;Unauthorized&quot;
+     *     }
+     */
+    /**
+     *
+     * @param goodsId goods ID
+     * @param goods goods to be updated
+     * @param response http response
+     * @return response of Goods type
+     */
+    @RequestMapping(value = &quot;/goods/{id}&quot;, method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH})
+    @ResponseBody
+    public Response&lt;Goods&gt; updateGoods(@PathVariable(&quot;id&quot;) Long goodsId,
+                                       @RequestBody Goods goods,
+                                       HttpServletResponse response) {
+        try {
+<span class="fc" id="L223">            response.setStatus(HttpStatus.OK.value());</span>
+<span class="fc" id="L224">            return Response.of(goodsService.updateGoods(goodsId, goods, UserContext.getCurrentUser().getId()));</span>
+<span class="nc" id="L225">        } catch (HttpException e) {</span>
+<span class="nc" id="L226">            response.setStatus(e.getStatusCode());</span>
+<span class="nc" id="L227">            return Response.error(e.getMessage());</span>
+        }
+    }
+
+
+    /**
+     * @api {delete} /goods/:id delete goods
+     * @apiName DeleteGoods
+     * @apiGroup goods
+     *
+     * @apiHeader {String} Accept application/json
+     *
+     * @apiParam {Number} id goods ID
+     *
+     * @apiSuccess {Goods} data deleted goods
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 204 No Content
+     *     {
+     *       &quot;data&quot;: {
+     *              &quot;id&quot;: 12345,
+     *              &quot;name&quot;: &quot;soap&quot;,
+     *              &quot;description&quot;: &quot;coconut soap&quot;,
+     *              &quot;details&quot;: &quot;coconut soap made with premium material&quot;,
+     *              &quot;imgUrl&quot;: &quot;https://img.url&quot;,
+     *              &quot;price&quot;: 500,
+     *              &quot;stock&quot;: 10,
+     *              &quot;createdAt&quot;: &quot;2020-03-22T13:22:03Z&quot;,
+     *              &quot;updatedAt&quot;: &quot;2020-03-22T13:22:03Z&quot;
+     *       }
+     *     }
+     *
+     * @apiError 400 Bad Request If request contains error
+     * @apiError 401 Unauthorized If user hasn't login yet
+     * @apiError 403 Forbidden If user try to access shop which does not belong to him
+     * @apiError 404 Not Found If goods was not found
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *       &quot;message&quot;: &quot;Unauthorized&quot;
+     *     }
+     */
+
+    /**
+     * @param goodsId the goods id to be deleted
+     * @param response the HTTP response
+     * @return the deleted goods
+     */
+    @DeleteMapping(&quot;/goods/{id}&quot;)
+    @ResponseBody
+    public Response&lt;Goods&gt; deleteGoods(@PathVariable(&quot;id&quot;) Long goodsId,
+                                       HttpServletResponse response) {
+
+<span class="nc" id="L281">        response.setStatus(HttpStatus.NO_CONTENT.value());</span>
+        try {
+<span class="nc" id="L283">            Goods goods = new Goods();</span>
+<span class="nc" id="L284">            goods.setName(&quot;car&quot;);</span>
+<span class="nc" id="L285">            return Response.of(goods);</span>
+            //return Response.of(goodsService.deleteGoodsById(goodsId, UserContext.getCurrentUser().getId()));
+<span class="nc" id="L287">        } catch (HttpException e) {</span>
+<span class="nc" id="L288">            response.setStatus(e.getStatusCode());</span>
+<span class="nc" id="L289">            return Response.error(e.getMessage());</span>
+        }
+    }
+
+
+    private void dataSanitization(Goods goods) {
+<span class="fc" id="L295">        goods.setId(null);</span>
+<span class="fc" id="L296">        goods.setCreatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L297">        goods.setUpdatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L298">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

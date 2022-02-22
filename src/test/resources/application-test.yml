@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/shop-test?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driverClassName: com.mysql.cj.jdbc.Driver
+mybatis:
+  config-location: classpath:db/mybatis/config.xml
+
+dubbo:
+  application:
+    name: wxshop-main-test
+  protocol:
+    name: dubbo
+    port: 12346
+  scan:
+    base-packages: com.github.jianqibot.wxshop.mock
+  registry:
+    address: N/A
+
+wxshop:
+  orderService:
+    version: 1.0.0
+    url: dubbo://127.0.0.1:12346
+
+shiro-redis:
+  redis-manager:
+    host: 127.0.0.1:6380
